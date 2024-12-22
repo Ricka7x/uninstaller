@@ -80,50 +80,106 @@ export default function Command() {
     }
 
     try {
-      // Show searching toast
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Finding related files...",
-      });
-
       // Find related files
       const appSize = await getFileSize(app.path);
-      const escapedName = app.name.replace(/["()]/g, '\\$&');
-      const mdfindCmd = `mdfind "kMDItemDisplayName == '${escapedName}'*c || kMDItemPath == *'${escapedName}.app'*c"`;
-      const relatedFiles = execSync(mdfindCmd, { encoding: "utf8" })
-        .split("\n")
-        .filter(Boolean)
-        .filter(file => 
-          file.includes("/Library/") || 
-          file.includes(app.path)
-        );
-
-      // Get sizes for all files
-      const relatedFilesWithSizes = await Promise.all(
-        relatedFiles.map(async (file) => ({
-          path: file,
-          size: await getFileSize(file)
-        }))
-      );
-
-      // Build detailed message
-      let message = `The following items will be removed:\n\n`;
-      message += `📦 ${app.name}.app (${appSize})\n   ${app.path}\n\n`;
       
-      if (relatedFilesWithSizes.length > 0) {
-        message += `Related files:\n`;
-        relatedFilesWithSizes.forEach(({path: filePath, size}) => {
-          message += `📄 ${path.basename(filePath)} (${size})\n   ${filePath}\n`;
-        });
+      // Get app bundle identifier
+      let bundleId = "";
+      try {
+        bundleId = execSync(`mdls -name kMDItemCFBundleIdentifier -raw "${app.path}"`).toString().trim();
+        console.log("Found bundle ID:", bundleId);
+      } catch (error) {
+        console.error("Failed to get bundle ID:", error);
       }
 
-      const { alwaysUseAdmin } = getPreferenceValues<{ alwaysUseAdmin: boolean }>();
-      if (alwaysUseAdmin || app.path.startsWith("/Applications/")) {
-        message += `\nThis may require administrator privileges and you'll be prompted for your password if needed.`;
+      // Find related files in common locations
+      const homeDir = process.env.HOME;
+      const relatedFiles: string[] = [];
+
+      // Get app name variations
+      const appNameLower = app.name.toLowerCase();
+      const appNameNoSpaces = appNameLower.replace(/\s+/g, '');
+      
+      // Common paths to check
+      const commonPaths = [
+        // User Library
+        `${homeDir}/Library/Application Support/${app.name}`,
+        `${homeDir}/Library/Preferences/${app.name}.plist`,
+        `${homeDir}/Library/Caches/${app.name}`,
+        `${homeDir}/Library/Saved Application State/${app.name}.savedState`,
+        `${homeDir}/Library/Preferences/com.${appNameNoSpaces}.plist`,
+        `${homeDir}/Library/Containers/${app.name}`,
+        `${homeDir}/Library/WebKit/${app.name}`,
+        
+        // System Library
+        `/Library/Application Support/${app.name}`,
+        `/Library/Preferences/${app.name}.plist`,
+        `/Library/Caches/${app.name}`
+      ];
+
+      // Add bundle ID paths if available
+      if (bundleId) {
+        const bundlePaths = [
+          `${homeDir}/Library/Application Support/${bundleId}`,
+          `${homeDir}/Library/Preferences/${bundleId}.plist`,
+          `${homeDir}/Library/Caches/${bundleId}`,
+          `${homeDir}/Library/Saved Application State/${bundleId}.savedState`,
+          `${homeDir}/Library/Containers/${bundleId}`,
+          `/Library/Application Support/${bundleId}`,
+          `/Library/Preferences/${bundleId}.plist`
+        ];
+        commonPaths.push(...bundlePaths);
+      }
+
+      // Check each path
+      for (const location of commonPaths) {
+        try {
+          const exists = execSync(`test -e "${location}" && echo "exists"`).toString().includes("exists");
+          if (exists) {
+            console.log("Found file:", location);
+            relatedFiles.push(location);
+          }
+        } catch {
+          // Path doesn't exist, skip it
+        }
+      }
+
+      // Get sizes for existing files
+      const relatedFilesWithSizes = await Promise.all(
+        relatedFiles.map(async (file) => {
+          const size = await getFileSize(file);
+          return { path: file, size };
+        })
+      );
+
+      console.log("Found files:", relatedFilesWithSizes);
+
+      // Calculate sizes
+      const appSizeNum = parseInt(appSize);
+      const totalSizeNum = parseInt(execSync(`du -sh "${app.path}" ${relatedFiles.join(" ")} | awk '{sum += $1} END {print sum}'`).toString().trim());
+      const relatedSizeNum = totalSizeNum - appSizeNum;
+
+      // Format sizes
+      const formatSize = (size: number) => {
+        if (size >= 1000) {
+          return `${(size / 1000).toFixed(1)}G`;
+        }
+        return `${size}M`;
+      };
+      
+      // Build message
+      let message = `${app.name}.app and ${relatedFilesWithSizes.length} related files (${formatSize(totalSizeNum)} total)`;
+      
+      // Add main app
+      message += `\n\n📦 ${app.name}.app (${formatSize(appSizeNum)})`;
+      
+      // Add related files if any
+      if (relatedFilesWithSizes.length > 0) {
+        message += `\n📄 ${relatedFilesWithSizes.length} related files (${formatSize(relatedSizeNum)})`;
       }
 
       const options: Alert.Options = {
-        title: "Uninstall Application",
+        title: `Uninstall ${app.name}`,
         message,
         primaryAction: {
           title: "Uninstall",
