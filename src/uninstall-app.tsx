@@ -408,7 +408,6 @@ This action cannot be undone. Are you sure you want to continue?`,
           key={app.path}
           icon={{ fileIcon: app.path }}
           title={app.name}
-          subtitle={path.basename(app.path)}
           actions={
             <ActionPanel>
               <Action
