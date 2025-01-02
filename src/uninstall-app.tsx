@@ -20,6 +20,7 @@ interface Preferences {
   skipPaths?: string;
 }
 
+// Debug logging function
 function log(message: string, ...args: unknown[]) {
   const { debugMode } = getPreferenceValues<Preferences>();
   if (debugMode) {
@@ -27,6 +28,7 @@ function log(message: string, ...args: unknown[]) {
   }
 }
 
+// Formats error messages
 function formatError(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
@@ -34,14 +36,17 @@ function formatError(error: unknown): string {
   return String(error);
 }
 
+// Escapes file paths for shell commands
 function escapeShellPath(filePath: string): string {
   return `'${filePath.replace(/'/g, "'\\''")}'`;
 }
 
+// Escapes strings for AppleScript
 function escapeAppleScript(str: string): string {
   return str.replace(/[\\"]/g, '\\$&');
 }
 
+// Formats byte sizes
 function formatBytes(bytes: number): string {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   let size = bytes;
@@ -55,6 +60,7 @@ function formatBytes(bytes: number): string {
   return `${size.toFixed(1)} ${units[unitIndex]}`;
 }
 
+// Checks if a file exists
 function fileExists(filePath: string): boolean {
   try {
     execSync(`test -e ${escapeShellPath(filePath)}`);
@@ -64,6 +70,7 @@ function fileExists(filePath: string): boolean {
   }
 }
 
+// Removes files with admin privileges
 async function removeWithAdmin(files: string[]): Promise<void> {
   const tempScript = `/tmp/uninstall_${Date.now()}.sh`;
   const scriptContent = [
@@ -78,7 +85,6 @@ async function removeWithAdmin(files: string[]): Promise<void> {
     '  fi',
     '}',
     '',
-    '# Remove files',
     ...files.map(file => `remove_file ${escapeShellPath(file)}`),
     '',
     'if [ $error_count -gt 0 ]; then',
@@ -103,19 +109,23 @@ async function removeWithAdmin(files: string[]): Promise<void> {
   }
 }
 
+// Main command component that handles the uninstallation flow
 export default function Command() {
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentView, setCurrentView] = useState<'appList' | 'fileList'>('appList');
-  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
-  const [relatedFiles, setRelatedFiles] = useState<string[]>([]);
+  // State management for the application list and related data
+  const [applications, setApplications] = useState<Application[]>([]); // List of installed apps
+  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [currentView, setCurrentView] = useState<'appList' | 'fileList'>('appList'); // Current view state
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null); // Currently selected app
+  const [relatedFiles, setRelatedFiles] = useState<string[]>([]); // Files related to selected app
 
+  // Effect hook to load applications when view changes
   useEffect(() => {
     if (currentView === 'appList') {
       loadApplications();
     }
   }, [currentView]);
 
+  // Loads installed applications from /Applications directory
   async function loadApplications() {
     try {
       const apps = await getApplications();
@@ -132,6 +142,7 @@ export default function Command() {
     }
   }
 
+  // Finds all files related to an application (preferences, caches, etc.)
   async function findRelatedFiles(app: Application): Promise<string[]> {
     const homeDir = process.env.HOME;
     if (!homeDir) throw new Error("HOME environment variable not set");
@@ -277,6 +288,7 @@ export default function Command() {
     return Array.from(files);
   }
 
+  // Handles the actual uninstallation process
   async function uninstallApplication(app: Application, files: string[]) {
     await showToast({
       style: Toast.Style.Animated,
