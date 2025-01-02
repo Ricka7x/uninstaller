@@ -16,7 +16,6 @@ import { execSync } from "child_process";
 import path from "path";
 
 interface Preferences {
-  alwaysUseAdmin: boolean;
   debugMode: boolean;
   skipPaths?: string;
 }
