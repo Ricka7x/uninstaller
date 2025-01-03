@@ -2,7 +2,6 @@ import { Application } from "@raycast/api";
 
 export interface Preferences {
   debugMode: boolean;
-  skipPaths?: string;
 }
 
 export interface AppListProps {

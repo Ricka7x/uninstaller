@@ -23,20 +23,13 @@
   ],
   "preferences": [
     {
-      "label": "General",
+      "label": "Debug Mode",
       "name": "debugMode",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "title": "Debug Mode",
+      "title": "General",
       "description": "Show detailed logs in Raycast console for troubleshooting."
-    },
-    {
-      "name": "skipPaths",
-      "type": "textfield",
-      "required": false,
-      "title": "Skip Paths",
-      "description": "Comma-separated list of paths to skip when searching for related files (e.g., /Library/Caches)."
     }
   ],
   "dependencies": {

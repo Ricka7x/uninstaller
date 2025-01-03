@@ -1,4 +1,4 @@
-import { Application, getPreferenceValues } from "@raycast/api";
+import { Application } from "@raycast/api";
 import { execSync } from "child_process";
 import path from "path";
 import { escapeShellPath, fileExists, log } from "./helpers";
@@ -7,13 +7,6 @@ import { escapeShellPath, fileExists, log } from "./helpers";
 export async function findRelatedFiles(app: Application): Promise<string[]> {
   const homeDir = process.env.HOME;
   if (!homeDir) throw new Error("HOME environment variable not set");
-
-  const { skipPaths } = getPreferenceValues<Preferences>();
-  const skipList =
-    skipPaths
-      ?.split(",")
-      .map((p) => p.trim())
-      .filter(Boolean) ?? [];
 
   let bundleId = "";
   try {
@@ -113,11 +106,6 @@ export async function findRelatedFiles(app: Application): Promise<string[]> {
 
   const files = new Set<string>();
   for (const location of commonPaths) {
-    if (skipList.some((skip) => location.startsWith(skip))) {
-      log("Skipping path:", location);
-      continue;
-    }
-
     if (fileExists(location)) {
       log("Found file:", location);
       files.add(location);
