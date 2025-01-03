@@ -36,8 +36,7 @@ The extension will:
 
 ## Preferences
 
-- **Debug Mode**: Enable debug logging
-- **Skip Paths**: Comma-separated list of paths to exclude from scanning
+- **Debug Mode**: Enable debug logging (development only) - shows detailed console output prefixed with [Debug]
 
 ## Requirements
 
