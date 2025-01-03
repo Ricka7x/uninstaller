@@ -1,6 +1,7 @@
 # Uninstall App Raycast Extension
 
 A Raycast extension that helps you completely uninstall macOS applications by removing:
+
 - The application itself
 - All related support files
 - Preferences and settings
@@ -28,6 +29,7 @@ A Raycast extension that helps you completely uninstall macOS applications by re
 4. Confirm the uninstallation
 
 The extension will:
+
 1. Remove the application
 2. Delete all related files
 3. Clean up preferences and caches

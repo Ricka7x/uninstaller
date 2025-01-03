@@ -23,14 +23,7 @@
   ],
   "preferences": [
     {
-      "name": "alwaysUseAdmin",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "title": "Always Use Admin Privileges",
-      "description": "Always request administrator privileges when uninstalling apps. If disabled, will only request when needed."
-    },
-    {
+      "label": "General",
       "name": "debugMode",
       "type": "checkbox",
       "required": false,

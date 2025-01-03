@@ -5,21 +5,20 @@ export interface Preferences {
   skipPaths?: string;
 }
 
-
 export interface AppListProps {
-    isLoading: boolean;
-    applications: Application[];
-    setSelectedApp: (app: Application | null) => void;
-    setRelatedFiles: (files: string[]) => void;
-    setCurrentView: (view: "appList" | "fileList") => void;
+  isLoading: boolean;
+  applications: Application[];
+  setSelectedApp: (app: Application | null) => void;
+  setRelatedFiles: (files: string[]) => void;
+  setCurrentView: (view: "appList" | "fileList") => void;
 }
 
 export interface FileListProps {
-    selectedApp: Application | null;
-    allFiles: string[];
-    loadApplications: () => Promise<void>;
-    totalSize: string;
-    setCurrentView: (view: "appList" | "fileList") => void;
-    setSelectedApp: (app: Application | null) => void;
-    setRelatedFiles: (files: string[]) => void;
+  selectedApp: Application | null;
+  allFiles: string[];
+  loadApplications: () => Promise<void>;
+  totalSize: string;
+  setCurrentView: (view: "appList" | "fileList") => void;
+  setSelectedApp: (app: Application | null) => void;
+  setRelatedFiles: (files: string[]) => void;
 }

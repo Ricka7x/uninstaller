@@ -1,4 +1,3 @@
-
 import { execSync } from "child_process";
 import { escapeAppleScript, escapeShellPath, log } from "./helpers";
 
@@ -6,26 +5,26 @@ import { escapeAppleScript, escapeShellPath, log } from "./helpers";
 export async function removeWithAdmin(files: string[]): Promise<void> {
   const tempScript = `/tmp/uninstall_${Date.now()}.sh`;
   const scriptContent = [
-    '#!/bin/bash',
-    'set -e',
-    '',
-    'error_count=0',
-    '',
-    'remove_file() {',
+    "#!/bin/bash",
+    "set -e",
+    "",
+    "error_count=0",
+    "",
+    "remove_file() {",
     '  if [ -e "$1" ]; then',
     '    rm -rf "$1" || ((error_count++))',
-    '  fi',
-    '}',
-    '',
-    ...files.map(file => `remove_file ${escapeShellPath(file)}`),
-    '',
-    'if [ $error_count -gt 0 ]; then',
+    "  fi",
+    "}",
+    "",
+    ...files.map((file) => `remove_file ${escapeShellPath(file)}`),
+    "",
+    "if [ $error_count -gt 0 ]; then",
     '  echo "Failed to remove $error_count files"',
-    '  exit 1',
-    'fi',
-    '',
-    'exit 0'
-  ].join('\n');
+    "  exit 1",
+    "fi",
+    "",
+    "exit 0",
+  ].join("\n");
 
   try {
     execSync(`echo ${escapeShellPath(scriptContent)} > ${tempScript}`);
@@ -40,5 +39,3 @@ export async function removeWithAdmin(files: string[]): Promise<void> {
     throw new Error("Failed to remove files with administrator privileges. Please try again.");
   }
 }
-
-

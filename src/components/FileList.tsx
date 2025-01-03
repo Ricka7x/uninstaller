@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
-import { escapeShellPath, formatBytes, formatError, log } from "../utils/helpers";
 import path from "path";
-import { uninstallApplication } from "../utils/uninstall";
 import { execSync } from "child_process";
+import { uninstallApplication } from "../utils/uninstall";
 import { FileListProps } from "../types";
+import { escapeShellPath, formatBytes, formatError, log } from "../utils/helpers";
 
 export default function FileList({
   selectedApp,

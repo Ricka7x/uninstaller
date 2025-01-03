@@ -1,11 +1,9 @@
 import { execSync } from "child_process";
 
-import { escapeShellPath } from "./utils/helpers";
-
-import { useAppState } from "./hooks/use-app-state";
-
 import FileList from "./components/FileList";
 import AppList from "./components/AppList";
+import { useAppState } from "./hooks/use-app-state";
+import { escapeShellPath } from "./utils/helpers";
 
 // Main command component that handles the uninstallation flow
 export default function Command() {
